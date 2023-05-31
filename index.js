@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-
+const router = require(express.Router);
 
 const port = 5000; // or any other port number of your choice
 app.listen(port, () => {
@@ -11,14 +11,15 @@ app.listen(port, () => {
 // Use bodyParser to parse JSON data
 app.use(bodyParser.json());
 
-// app.use()
+// const auth = require("./src/api/auth/auth.routes.js");
+// router.use("/auth", auth);
 
-app.get('/', async (req, res, next) => {
+app.get("/", async(req, res, next) => {
     // Perform the necessary operations to retrieve all data
     // (e.g., fetch it from a database)
 
     // Send the retrieved data as a response
-    res.status(200).send({ message: "Cool It Works!"});
+    res.status(200).send({ message: "Cool It Works!" });
 });
 
 // app.post("/api/data", async(req, res) => {
@@ -36,8 +37,6 @@ app.get('/', async (req, res, next) => {
 //         res.status(500).json({ message: "Error inserting data" });
 //     }
 // });
-
-
 
 // app.get('/api/data/:id', (req, res) => {
 //     const id = req.params.id;
