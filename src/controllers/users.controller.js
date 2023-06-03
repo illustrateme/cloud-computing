@@ -3,13 +3,17 @@ const prisma = new PrismaClient()
 
 const getAllUser = async (req, res) => {
     try {
-        const users = prisma.user.findMany()
-        res.json(users)
+        const users = await prisma.user.findMany()
+        res.json({
+            status: 'success',
+            message: 'Successfully getAllUsers',
+            data: {users}
+        })
     } catch (error) {
         console.log(error.message);
     const response = res.status(500).json({
       status: 'failed',
-      message: 'Service unavailable.',
+      message: 'Service getAllUser unavailable.',
     });
     return response;
     }
@@ -17,16 +21,20 @@ const getAllUser = async (req, res) => {
 
 const getUserInfo = async (req, res) => {
     try {
-        const {id} = req.params
-    const userInfo = prisma.user.findUnique({
-        where: {id: Number(id)},
+        const {username} = req.body
+    const userInfo = await prisma.user.findUnique({
+        where: {username: username}
     })
-    res.status(201).json(userInfo)
+    res.status(201).json({
+        status: "success",
+        message: "Successfully getUserInfo",
+        data: userInfo
+    })
     } catch (error) {
         console.log(error.message);
     const response = res.status(500).json({
       status: 'failed',
-      message: 'Service unavailable.',
+      message: 'Service getUserInfo unavailable.',
     });
     return response;
     }
@@ -35,12 +43,6 @@ const getUserInfo = async (req, res) => {
 
 const register = async (req, res) => {
     const {username, name, email, password} = req.body;
-    // const registeredAt = new Date().toISOString;
-    // const postData = posts
-    // ? posts.map((post) => {
-    //     return { title: post.title, content: post.content || undefined }
-    //   })
-    // : []
     try {
          const newUser = await prisma.user.create({
             data: {
@@ -48,14 +50,18 @@ const register = async (req, res) => {
                 name,
                 email,
                 password,
-                
             },
+        })
+        res.status(200).json({
+            status: 'success',
+            message: 'Successfully register',
+            data: newUser
         })
     } catch (error) {
         console.log(error.message);
     const response = res.status(500).json({
       status: 'failed',
-      message: 'Service unavailable.',
+      message: 'Service register unavailable.',
     });
     return response;
     }

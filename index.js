@@ -3,8 +3,6 @@ const app = express();
 const bodyParser = require("body-parser");
 const userRoutes = require('./src/routes/users.routes');
 
-
-
 const port = 5000;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
