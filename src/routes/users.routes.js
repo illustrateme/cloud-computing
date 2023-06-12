@@ -3,6 +3,6 @@ const {getUserInfo, getAllUser, register} = require('../controllers/users.contro
 
 router.get('/', (getAllUser));
 router.get('/:username', (getUserInfo));
-router.post('/', (register));
+// router.post('/register', (register));
 
 module.exports = router;

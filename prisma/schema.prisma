@@ -23,19 +23,28 @@ model User {
 
 model Post {
   id     Int @id @default(autoincrement())
-  authorId String
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
   title String @default("Title")
   description String?
   imageUrl String
+  priceStartFrom Int
+  authorId String
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  categoryId Int
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  designTypeId Int
+  design_type DesignType @relation(fields: [designTypeId], references: [id], onDelete: Cascade)
+  designStyleId Int
+  design_style DesignStyle @relation(fields: [designStyleId], references: [id], onDelete: Cascade)
 }
 
-model Category {
-  id Int @id @default(autoincrement())
+model DesignType {
+  id Int @id 
+  name String
+  posts Post[]
+}
+
+model DesignStyle {
+  id Int @id 
   name String
   posts Post[]
 }
