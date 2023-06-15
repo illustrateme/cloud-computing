@@ -1,4 +1,10 @@
 const router = require('express').Router();
-const {addPost} = require('../controllers/posts.controller')
+const {addPost, searchByTag, getAllUserPost, getAllPost} = require('../controllers/posts.controller')
 
-router.post('/newpost', (addPost));
+router.get('/posts', (getAllPost))
+router.post('/addpost', (addPost));
+router.get('/search', (searchByTag))
+router.get('/:username', (getAllUserPost))
+
+
+module.exports = router;

@@ -2,87 +2,86 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient()
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
+const verifyJwt = promisify(jwt.verify);
 
-const getAllUser = async(req, res) => {
-    try {
-        const users = await prisma.user.findMany()
-        res.json({
-            status: 'success',
-            message: 'Successfully getAllUsers',
-            data: { users }
-        })
-    } catch (error) {
-        console.log(error.message);
-        const response = res.status(500).json({
-            status: 'failed',
-            message: 'Service getAllUser unavailable.',
-        });
-        return response;
-    }
+const getAllUser = async (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    res.status(401).json({ error: 'No authorization token provided' });
+    return;
+  }
+
+  try {
+    const splitToken = token.split(" ")[1];
+    jwt.verify(splitToken, 'secret');
+    const users = await prisma.user.findMany({
+      include: {
+        posts: {
+          include: {
+            design_type: true,
+            design_style: true,
+          }
+        }
+      },
+      select: {
+        username: true,
+        email: true,
+        posts: true,
+      },
+    });
+    res.json({
+      status: 'success',
+      message: 'Successfully getAllUsers',
+      data: users,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 'failed',
+      message: 'Service getAllUser unavailable.',
+      error: error.message,
+    });
+  }
 }
-
-const getUserInfo = async(req, res) => {
-    try {
-        const { username } = req.body
+    
+const getUserInfo = async (req, res) => {
+    const token = req.headers.authorization;
+    if (!token) {
+      res.status(401).json({ error: 'No authorization token provided' });
+    } else {
+      try {
+        const splitToken = token.split(" ")[1];
+        jwt.verify(splitToken, 'secret');
+        const username = req.params.username;
         const userInfo = await prisma.user.findUnique({
-            where: { username: username },
-            select: {
-                username: true,
-                name: true,
-                email: true,
-                posts: {
-                    select: {
-                        id: true
-                    }
-                }
-              }
-        })
-        res.status(201).json({
-            status: "success",
-            message: "Successfully getUserInfo",
-            data: userInfo
-        })
-    } catch (error) {
+          where: { username: username },
+          select: {
+            username: true,
+            name: true,
+            email: true,
+            posts: true,
+          },
+        });
+        
+        if (userInfo && userInfo.username !== username) {
+          return res.status(400).json({ error: "Username not available" });
+        }
+        res.status(200).json({
+          status: 'success',
+          message: 'Successfully getUserInfo',
+          data: userInfo,
+        });
+      } catch (error) {
         console.log(error.message);
-        const response = res.status(500).json({
-            status: 'failed',
-            message: 'Service getUserInfo unavailable.',
+        res.status(500).json({
+          status: 'failed',
+          message: 'Service getUserInfo unavailable.',
         });
-        return response;
+      }
     }
-}
-const register = async(req, res) => {
-    const { username, name, email, password } = req.body;
-    try {
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create a new user
-        const newUser = await prisma.user.create({
-            data: {
-                username,
-                name,
-                email,
-                password: hashedPassword,
-            },
-        });
-
-        // Generate JWT token
-        const token = jwt.sign({ userId: newUser.id }, 'your-secret-key');
-
-        res.status(201).json({
-            status: 'success',
-            message: 'Successfully registered',
-            data: {
-                user: newUser,
-                token: token,
-            },
-        });
-    } catch (error) {
-        console.error('Error registering user:', error);
-        res.status(500).json({ message: 'Failed to register user' });
-    }
-};
+  };
+  
 
 // const register = async (req, res) => {
 //     const {username, name, email, password} = req.body;
@@ -114,4 +113,4 @@ const register = async(req, res) => {
 //     const {username, password}
 // }
 
-module.exports = { getAllUser, getUserInfo, register }
+module.exports = { getAllUser, getUserInfo }
