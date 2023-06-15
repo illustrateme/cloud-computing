@@ -11,7 +11,6 @@ const port = 8080;
 
 
 app.listen(port, () => {
-
     console.log(`Server is running on port ${port}`);
 });
 
@@ -23,23 +22,17 @@ app.use('/user', userRoutes);
 
 app.post('/login', async(req, res) => {
     const { username, password } = req.body;
-
     try {
-        // Find the user by username
         const user = await prisma.user.findUnique({ where: { username } });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Compare the provided password with the stored hashed password
-
-
         if (password !== user.password) {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        // Generate a JWT token
         const token = jwt.sign({ userId: user.id }, 'secret');
 
         res.status(200).json({
@@ -58,9 +51,7 @@ app.post('/login', async(req, res) => {
 
 app.post('/register', async(req, res) => {
     const { username, name, email, password } = req.body;
-
     try {
-        // Check if the username is already used
         const existingUser = await prisma.user.findUnique({
             where: {
                 username: username,
@@ -71,22 +62,15 @@ app.post('/register', async(req, res) => {
             return res.status(409).json({ message: 'Username is already taken' });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create a new user
         const newUser = await prisma.user.create({
             data: {
                 username,
                 name,
                 email,
-                password: hashedPassword,
+                password,
             },
         });
-
-        // Generate JWT token
         const token = jwt.sign({ userId: newUser.id }, process.env.JWT_ACCESS_SECRET);
-
         res.status(201).json({
             status: 'success',
             message: 'Successfully registered',
