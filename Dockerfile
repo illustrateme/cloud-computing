@@ -17,7 +17,7 @@ RUN npm install --production
 RUN npx prisma generate 
 
 # Expose port 5000 for the application
-EXPOSE 5000
+EXPOSE 8080
 
 # Start the application using the "start" script defined in package.json
 CMD ["npm", "start"] 
